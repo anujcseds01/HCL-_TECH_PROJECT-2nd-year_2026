@@ -1,0 +1,21 @@
+{
+  "name": "covid-19-disease-trend-analysis",
+  "version": "1.0.0",
+  "description": "COVID-19 Disease Trend Analysis using Python, SQL, and Power BI",
+  "author": "Anuj Kumar Kushwaha (Roll: 250321540033), ABES Engineering College, Ghaziabad",
+  "license": "MIT",
+  "scripts": {
+    "start": "node web_dashboard/server.js",
+    "generate-data": "node dataset/generate_dataset.js",
+    "run-sql": "node sql/run_sql_analysis.js",
+    "analyze": "python python/covid_analysis.py"
+  },
+  "keywords": [
+    "covid-19",
+    "data-analytics",
+    "python",
+    "sql-window-functions",
+    "power-bi",
+    "data-visualization"
+  ]
+}
