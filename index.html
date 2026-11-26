@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COVID-19 Disease Trend Analysis | Python + SQL + Power BI</title>
+  
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Chart.js 4.4 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-virus">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="6"/>
+          <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="main-title">
+          COVID-19 <span>Disease Trend Analysis</span>
+          <span class="version-pill">v2.0 Executive BI</span>
+        </h1>
+        <p class="sub-title">Python (ETL) &bull; SQL (Window Functions) &bull; Power BI (Executive Visuals)</p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" aria-label="Main Navigation">
+      <button class="nav-btn active" data-tab="tab-dashboard">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Power BI Dashboard
+      </button>
+      <button class="nav-btn" data-tab="tab-sql">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        SQL Queries &amp; Engine
+      </button>
+      <button class="nav-btn" data-tab="tab-python">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+        Python Analysis Pipeline
+      </button>
+      <button class="nav-btn" data-tab="tab-overview">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Project Overview &amp; Poster
+      </button>
+    </nav>
+
+    <!-- Student Attribution Badge -->
+    <div class="header-right">
+      <div class="author-badge">
+        <div class="author-avatar">AK</div>
+        <div class="author-meta">
+          <span class="author-name">Anuj Kumar Kushwaha</span>
+          <span class="author-roll">Roll: 250321540033 &bull; ABES-EC</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Global Filter Toolbar -->
+  <section class="filter-toolbar" aria-label="Dashboard Filters">
+    <div class="filter-controls-group">
+      <!-- Country Filter -->
+      <div class="filter-item">
+        <label for="filter-country" class="filter-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Country
+        </label>
+        <select id="filter-country" class="filter-select">
+          <option value="All">All Countries (Global)</option>
+        </select>
+      </div>
+
+      <!-- Region Filter -->
+      <div class="filter-item">
+        <label for="filter-region" class="filter-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Region / Continent
+        </label>
+        <select id="filter-region" class="filter-select">
+          <option value="All">All Regions</option>
+        </select>
+      </div>
+
+      <!-- Start Date Filter -->
+      <div class="filter-item">
+        <label for="filter-start-date" class="filter-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Start Date
+        </label>
+        <input type="date" id="filter-start-date" class="filter-date-input" value="2020-01-01" min="2020-01-01" max="2023-12-31">
+      </div>
+
+      <!-- End Date Filter -->
+      <div class="filter-item">
+        <label for="filter-end-date" class="filter-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          End Date
+        </label>
+        <input type="date" id="filter-end-date" class="filter-date-input" value="2023-12-31" min="2020-01-01" max="2023-12-31">
+      </div>
+
+      <!-- Quick Preset Chips -->
+      <div class="date-presets-group">
+        <button class="preset-chip active" data-preset="all">All Dates</button>
+        <button class="preset-chip" data-preset="2020">2020</button>
+        <button class="preset-chip" data-preset="2021">2021</button>
+        <button class="preset-chip" data-preset="2022">2022</button>
+        <button class="preset-chip" data-preset="2023">2023</button>
+        <button class="preset-chip" data-preset="delta">Delta Wave</button>
+        <button class="preset-chip" data-preset="omicron">Omicron Peak</button>
+      </div>
+    </div>
+
+    <!-- Filter Actions -->
+    <div class="filter-actions-group">
+      <div class="active-filter-indicator">
+        <span class="status-dot"></span>
+        <span id="selected-records-count">16,071 daily records (11 countries)</span>
+      </div>
+      <button id="btn-reset-filters" class="btn-reset-filters">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Reset Filters
+      </button>
+    </div>
+  </section>
+
+  <!-- Main Application Body -->
+  <div class="main-container">
+
+    <!-- ======================================================================
+         TAB 1: Power BI Dashboard Replica
+         ====================================================================== -->
+    <main id="tab-dashboard" class="tab-content active">
+      <section class="dashboard-wrapper">
+        
+        <!-- Dashboard Canvas Header -->
+        <div class="dashboard-title-bar">
+          <div class="dashboard-heading">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="#38bdf8" fill="none" stroke-width="2">
+              <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/>
+            </svg>
+            <h2>Power BI Dashboard &ndash; COVID-19 Trends</h2>
+          </div>
+          <div class="dashboard-badge">
+            <span class="pulse-dot"></span> REAL-TIME DATA-DRIVEN MODEL
+          </div>
+        </div>
+
+        <!-- 8 Dynamic Metric KPI Cards -->
+        <div class="kpi-grid">
+          <!-- Total Cases -->
+          <div class="kpi-card card-cases">
+            <div class="kpi-header">
+              <span class="kpi-title">Total Confirmed Cases</span>
+              <div class="kpi-icon" style="background: rgba(56,189,248,0.2); color: #38bdf8;">🌐</div>
+            </div>
+            <div class="kpi-value" id="kpi-total-cases">676.6M</div>
+            <div class="kpi-footer">
+              <span class="kpi-tag tag-blue">▲ Actual Cumulative</span>
+              <span>Global infections</span>
+            </div>
+          </div>
+
+          <!-- Total Deaths -->
+          <div class="kpi-card card-deaths">
+            <div class="kpi-header">
+              <span class="kpi-title">Total Attributable Deaths</span>
+              <div class="kpi-icon" style="background: rgba(239,68,68,0.2); color: #fca5a5;">💀</div>
+            </div>
+            <div class="kpi-value" id="kpi-total-deaths">6.88M</div>
+            <div class="kpi-footer">
+              <span class="kpi-tag tag-red">CFR Indicator</span>
+              <span id="kpi-deaths-sub">Total mortality</span>
+            </div>
+          </div>
+
+          <!-- Total Recovered -->
+          <div class="kpi-card card-recovered">
+            <div class="kpi-header">
+              <span class="kpi-title">Total Documented Recoveries</span>
+              <div class="kpi-icon" style="background: rgba(16,185,129,0.2); color: #6ee7b7;">💚</div>
+            </div>
+            <div class="kpi-value" id="kpi-total-recovered">658.1M</div>
+            <div class="kpi-footer">
+              <span class="kpi-tag tag-green">Resolved</span>
+              <span>Patient clearances</span>
+            </div>
+          </div>
+
+          <!-- Active Cases -->
+          <div class="kpi-card card-active">
+            <div class="kpi-header">
+              <span class="kpi-title">Active Infectious Burden</span>
+              <div class="kpi-icon" style="background: rgba(168,85,247,0.2); color: #d8b4fe;">⚡</div>
+            </div>
+            <div class="kpi-value" id="kpi-active-cases">11.6M</div>
+            <div class="kpi-footer">
+              <span class="kpi-tag tag-purple">Active Ratio</span>
+              <span>Cases - Deaths - Rec</span>
+            </div>
+          </div>
+
+          <!-- 7-Day Avg Cases -->
+          <div class="kpi-card card-sub-metric">
+            <div class="kpi-header">
+              <span class="kpi-title">7-Day Moving Avg (Current)</span>
+              <span style="font-size: 15px;">📊</span>
+            </div>
+            <div class="kpi-value" id="kpi-avg-cases" style="color: #f59e0b; font-size: 24px;">3.4M</div>
+            <div class="kpi-footer">
+              <span>Smoothed Noise-Free Trajectory</span>
+            </div>
+          </div>
+
+          <!-- Case Fatality Rate -->
+          <div class="kpi-card card-sub-metric">
+            <div class="kpi-header">
+              <span class="kpi-title">Case Fatality Rate (CFR)</span>
+              <span style="font-size: 15px;">📉</span>
+            </div>
+            <div class="kpi-value" id="kpi-cfr" style="color: #f87171; font-size: 24px;">1.02%</div>
+            <div class="kpi-footer">
+              <span>Deaths / Cases Percentage</span>
+            </div>
+          </div>
+
+          <!-- Recovery Rate -->
+          <div class="kpi-card card-sub-metric">
+            <div class="kpi-header">
+              <span class="kpi-title">Recovery Rate</span>
+              <span style="font-size: 15px;">🛡️</span>
+            </div>
+            <div class="kpi-value" id="kpi-recovery-rate" style="color: #34d399; font-size: 24px;">97.27%</div>
+            <div class="kpi-footer">
+              <span>Recoveries / Cases Percentage</span>
+            </div>
+          </div>
+
+          <!-- Peak Daily Record -->
+          <div class="kpi-card card-sub-metric">
+            <div class="kpi-header">
+              <span class="kpi-title">Peak Single-Day Record</span>
+              <span style="font-size: 15px;">🏔️</span>
+            </div>
+            <div class="kpi-value" id="kpi-peak-cases" style="color: #38bdf8; font-size: 24px;">4.1M</div>
+            <div class="kpi-footer">
+              <span id="kpi-peak-date-sub">Peak on 2022-01-20</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Automated Key Insights Panel -->
+        <section class="insights-panel" aria-label="Dynamic Automated Insights">
+          <div class="insights-header">
+            <div class="insights-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              Automatic Key Findings &amp; Epidemiological Insights
+            </div>
+            <span class="insights-tag">CALCULATED FROM FILTERED SELECTION</span>
+          </div>
+          <div id="insights-container" class="insights-grid">
+            <!-- Populated dynamically by DashboardEngine.generateDynamicInsights() -->
+          </div>
+        </section>
+
+        <!-- Charts Main Grid: Daily Cases & Country Comparison -->
+        <div class="charts-main-grid">
+          <!-- Chart 1: Daily Cases + 7-Day Moving Average -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-title-group">
+                <h3>Daily Cases and 7-Day Moving Average</h3>
+                <span class="chart-subtitle">Incident cases (blue) with 7-day rolling window smoothing (amber)</span>
+              </div>
+              <div class="chart-legend-box">
+                <span class="legend-badge"><span class="legend-color" style="background: #38bdf8;"></span> Daily Cases</span>
+                <span class="legend-badge"><span class="legend-color" style="background: #f59e0b;"></span> 7-Day Avg</span>
+              </div>
+            </div>
+            <div class="chart-container-box" style="height: 270px;">
+              <canvas id="chart-daily-cases"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Country Comparison Leaderboard -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-title-group">
+                <h3>Country Comparison Leaderboard</h3>
+                <span class="chart-subtitle">Top sovereign entities by total confirmed volume</span>
+              </div>
+            </div>
+            <div class="chart-container-box" style="height: 270px;">
+              <canvas id="chart-country-bar"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Two-Column: Cumulative Trend & Monthly Volume -->
+        <div class="charts-two-col">
+          <!-- Chart 3: Cumulative Cases Trend -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-title-group">
+                <h3>Cumulative Cases Trend (Running Total)</h3>
+                <span class="chart-subtitle">Progressive total infection curve over selected timeline</span>
+              </div>
+            </div>
+            <div class="chart-container-box" style="height: 230px;">
+              <canvas id="chart-cumulative"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 4: Monthly Cases & Deaths Trend -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-title-group">
+                <h3>Monthly Cases &amp; Deaths Trend</h3>
+                <span class="chart-subtitle">Calendar monthly totals highlighting wave zeniths</span>
+              </div>
+            </div>
+            <div class="chart-container-box" style="height: 230px;">
+              <canvas id="chart-monthly"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Three-Column: Mortality, CFR Evolution & Per Million Density -->
+        <div class="charts-three-col">
+          <!-- Chart 5: Daily Deaths Trajectory -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-title-group">
+                <h3>Daily Deaths Trajectory</h3>
+                <span class="chart-subtitle">Smoothed mortality trend</span>
+              </div>
+            </div>
+            <div class="chart-container-box" style="height: 210px;">
+              <canvas id="chart-deaths"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 6: Case Fatality Rate Evolution -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-title-group">
+                <h3>CFR Evolution &amp; Vaccine Decoupling</h3>
+                <span class="chart-subtitle">Quarterly Case Fatality Rate (%)</span>
+              </div>
+            </div>
+            <div class="chart-container-box" style="height: 210px;">
+              <canvas id="chart-cfr-trend"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 7: Cases per Million People -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-title-group">
+                <h3>Cases per 1M Population</h3>
+                <span class="chart-subtitle">Population-normalized attack density</span>
+              </div>
+            </div>
+            <div class="chart-container-box" style="height: 210px;">
+              <canvas id="chart-per-million"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Country-Wise Epidemiological Performance Summary Table -->
+        <div class="table-preview-card" style="margin-top: 6px;">
+          <div class="table-toolbar">
+            <div class="table-toolbar-left">
+              <h3 style="font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                Country-Wise Epidemiological Leaderboard &amp; Records
+              </h3>
+              <span style="font-size: 11.5px; color: var(--text-dim);">Side-by-side comparison across sovereign entities</span>
+            </div>
+          </div>
+          <div class="data-table-wrapper" style="max-height: 360px;">
+            <table class="data-table" id="country-summary-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Country</th>
+                  <th>Continent</th>
+                  <th>Total Cases</th>
+                  <th>Total Deaths</th>
+                  <th>CFR %</th>
+                  <th>Recovered</th>
+                  <th>Recovery %</th>
+                  <th>Attack Rate</th>
+                  <th>Peak Daily Record</th>
+                  <th>Filter</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Populated dynamically by DashboardEngine.renderCountrySummaryTable() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Filtered Records Data Table Preview -->
+        <div class="table-preview-card">
+          <div class="table-toolbar">
+            <div class="table-toolbar-left">
+              <h3 style="font-size: 14px; font-weight: 700; color: #fff;">Daily Timeseries Records</h3>
+              <span id="table-count-label" style="font-size: 11.5px; color: var(--text-dim);">Showing recent daily records for the selected country &amp; timeline</span>
+            </div>
+            <input type="text" id="table-search-input" class="table-search-input" placeholder="Search date, country, cases...">
+          </div>
+          <div class="data-table-wrapper">
+            <table class="data-table" id="preview-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Country</th>
+                  <th>Region</th>
+                  <th>Daily Cases</th>
+                  <th>7-Day Avg</th>
+                  <th>Daily Deaths</th>
+                  <th>Cumulative Cases</th>
+                  <th>CFR %</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Populated dynamically by DashboardEngine.renderTable() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- ======================================================================
+         TAB 2: SQL Queries & Engine
+         ====================================================================== -->
+    <main id="tab-sql" class="tab-content">
+      <section class="panel-card">
+        <div class="panel-title-bar">
+          <div>
+            <h2>SQL Analytical Engine &amp; Window Functions</h2>
+            <p>Execute real-time queries against the 16,071 records of the <code>covid_data</code> relational table with actual execution timing and CSV exports.</p>
+          </div>
+          <div class="version-pill" style="font-size: 11px;">SQLite 3.45 Compliant</div>
+        </div>
+
+        <!-- Preset Query Buttons (All 8 User Required Queries) -->
+        <div class="sql-presets-container">
+          <span class="sql-preset-label">Query Library:</span>
+          <button class="sql-preset-btn active" data-qid="1">1. KPI Summary</button>
+          <button class="sql-preset-btn" data-qid="2">2. Cumulative Window</button>
+          <button class="sql-preset-btn" data-qid="3">3. 7-Day Moving Avg</button>
+          <button class="sql-preset-btn" data-qid="4">4. DENSE_RANK()</button>
+          <button class="sql-preset-btn" data-qid="5">5. LAG() Growth</button>
+          <button class="sql-preset-btn" data-qid="6">6. Year-wise CFR</button>
+          <button class="sql-preset-btn" data-qid="7">7. Country Analysis</button>
+          <button class="sql-preset-btn" data-qid="8">8. Peak Days</button>
+        </div>
+
+        <!-- Query Explanation Card -->
+        <div id="sql-explanation-text" class="query-explanation-box">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- SQL Code Editor -->
+        <div class="sql-editor-container">
+          <textarea id="sql-editor-input" class="sql-editor-area" spellcheck="false" rows="7"></textarea>
+          <div class="sql-editor-actions">
+            <div id="sql-status-indicator" class="sql-status-text">
+              <span class="status-dot"></span> Ready to execute
+            </div>
+            <div class="btn-group-actions">
+              <button id="btn-clear-results" class="btn-secondary">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Clear Results
+              </button>
+              <button id="btn-export-csv" class="btn-secondary">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export CSV
+              </button>
+              <button id="btn-execute-sql" class="btn-execute">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                Execute SQL
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Table Panel -->
+        <div class="sql-results-panel">
+          <div class="results-meta-bar">
+            <span>Query Results Output</span>
+            <div class="results-metrics-group">
+              <span>Rows: <strong id="sql-results-count">0 rows</strong></span>
+              <span>Execution Time: <strong id="sql-results-time">0 ms</strong></span>
+            </div>
+          </div>
+          <div class="data-table-wrapper" style="max-height: 380px;">
+            <table class="data-table" id="sql-output-table">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ======================================================================
+         TAB 3: Python Analysis Pipeline
+         ====================================================================== -->
+    <main id="tab-python" class="tab-content">
+      <section class="panel-card">
+        <div class="panel-title-bar">
+          <div>
+            <h2>Python Data Science &amp; Engineering Pipeline</h2>
+            <p>Step-by-step architecture: <strong>Raw Data &rarr; Data Cleaning &rarr; Data Validation &rarr; Feature Engineering &rarr; Statistical Analysis &rarr; Visualization &rarr; Insights</strong></p>
+          </div>
+          <div class="version-pill" style="font-size: 11px; background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.3);">Pandas 2.0+ &bull; NumPy</div>
+        </div>
+
+        <div class="pipeline-steps-container">
+          <!-- Step 1 -->
+          <div class="pipeline-card">
+            <span class="pipeline-step-badge">STEP 01</span>
+            <h3>Raw Data Ingestion &amp; Audit</h3>
+            <p>Ingests daily country timeseries files, checking schema datatypes, null densities, and initial row counts (16,071 records).</p>
+            <div class="pipeline-code-preview">df = pd.read_csv('data/covid_data_raw.csv')
+print(df.info())
+print(df.isnull().sum())</div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="pipeline-card">
+            <span class="pipeline-step-badge">STEP 02</span>
+            <h3>Data Cleaning &amp; Imputation</h3>
+            <p>Standardizes ISO country naming, converts mixed date string variants to ISO-8601, and fills reporting omissions.</p>
+            <div class="pipeline-code-preview">df['country'] = df['country'].str.strip()
+df['date'] = pd.to_datetime(df['date'])
+df.fillna({'new_cases': 0}, inplace=True)</div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="pipeline-card">
+            <span class="pipeline-step-badge">STEP 03</span>
+            <h3>Data Validation &amp; Deduplication</h3>
+            <p>Validates chronological monotonicity per country, ensures zero negative counts, and enforces composite primary key uniqueness.</p>
+            <div class="pipeline-code-preview">df = df.drop_duplicates(subset=['date', 'country'])
+assert (df['new_cases'] >= 0).all()
+assert df['date'].notnull().all()</div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="pipeline-card">
+            <span class="pipeline-step-badge">STEP 04</span>
+            <h3>Feature Engineering (Rolling Windows)</h3>
+            <p>Computes 7-day rolling moving averages via transform to eliminate weekly calendar backlogs, alongside cumulative running totals.</p>
+            <div class="pipeline-code-preview">df['rolling_7day'] = df.groupby('country')['new_cases'] \
+    .transform(lambda s: s.rolling(7, min_periods=1).mean())
+df['cum_cases'] = df.groupby('country')['new_cases'].cumsum()</div>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="pipeline-card">
+            <span class="pipeline-step-badge">STEP 05</span>
+            <h3>Statistical Analysis &amp; GroupBy</h3>
+            <p>Calculates Case Fatality Rate (CFR), population infection attack rate, and continent-level health performance metrics.</p>
+            <div class="pipeline-code-preview">df['cfr'] = (df['total_deaths'] / df['total_cases']) * 100
+summary = df.groupby('continent')[['new_cases', 'new_deaths']].sum()</div>
+          </div>
+
+          <!-- Step 6 -->
+          <div class="pipeline-card">
+            <span class="pipeline-step-badge">STEP 06</span>
+            <h3>Matplotlib &amp; Seaborn Visuals</h3>
+            <p>Generates high-resolution publication-grade figures matching the Power BI dark aesthetic for research dissemination.</p>
+            <div class="pipeline-code-preview">plt.style.use('dark_background')
+plt.plot(df['date'], df['rolling_7day'], color='#f59e0b')
+plt.savefig('figures/covid_trend.png', dpi=300)</div>
+          </div>
+        </div>
+
+        <div style="background: rgba(14,27,51,0.6); border: 1px solid var(--border-medium); border-radius: var(--radius-md); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div>
+            <h4 style="font-size: 14px; font-weight: 700; color: #fff;">Jupyter Notebook Submission File Available</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Located at <code>python/covid_analysis_notebook.ipynb</code> with full Markdown cell equations and pre-run outputs.</p>
+          </div>
+          <a href="python/covid_analysis.py" download style="background: #2563eb; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Python Script
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <!-- ======================================================================
+         TAB 4: Project Overview & Poster Blueprint
+         ====================================================================== -->
+    <main id="tab-overview" class="tab-content">
+      <section class="panel-card">
+        <div class="overview-grid">
+          
+          <!-- Column 1: Problem & Methodology -->
+          <div class="overview-block">
+            <h3>
+              <span>💡</span> Problem Statement &amp; Project Goal
+            </h3>
+            <p>The COVID-19 pandemic resulted in massive volumes of daily healthcare data requiring automated extraction, noise reduction, and actionable trend modeling. This project builds an end-to-end analytics workflow: <strong>Problem Statement &rarr; Dataset &rarr; Data Cleaning &rarr; Python Analysis &rarr; SQL Analysis &rarr; Dashboard &rarr; Key Insights &rarr; Conclusion</strong>.</p>
+            
+            <h3 style="margin-top: 14px;">
+              <span>🗄️</span> Dataset Specifications
+            </h3>
+            <ul>
+              <li><strong>Source:</strong> Our World in Data (WHO Epidemiological Timeseries).</li>
+              <li><strong>Temporal Coverage:</strong> January 1, 2020 through December 31, 2023 (1,461 Calendar Days).</li>
+              <li><strong>Attributes:</strong> Date, Country, ISO Code, Continent, Daily Cases, Cumulative Cases, Daily Deaths, Cumulative Deaths, Recovered, Active Cases, 7-Day Moving Averages, and Population.</li>
+            </ul>
+
+            <h3 style="margin-top: 14px;">
+              <span>⚙️</span> Technology Stack Flow
+            </h3>
+            <p><strong>Python (Pandas, NumPy)</strong> &rarr; <strong>SQL Relational Modeling (SQLite / MySQL Window Functions)</strong> &rarr; <strong>Power BI &amp; Interactive Web Dashboard</strong>.</p>
+          </div>
+
+          <!-- Column 2: Key Insights & Student Card -->
+          <div class="overview-block">
+            <h3>
+              <span>✅</span> Verified Epidemiological Findings
+            </h3>
+            <ul>
+              <li><strong>Bimodal Wave Zeniths:</strong> Transmission peaked during the mid-2021 Delta wave and early-2022 Omicron wave (surpassing 3.4M daily cases).</li>
+              <li><strong>Noise Filtering:</strong> 7-Day moving averages eliminate false weekend testing dips and Tuesday backlog surges.</li>
+              <li><strong>Vaccination Decoupling:</strong> Case Fatality Rate fell by 89.9% (from 2.32% in 2020 to 0.23% in 2023), confirming vaccine efficacy against severe outcomes.</li>
+              <li><strong>Geographic Burden:</strong> USA (106M) and India (44.7M) recorded the highest overall infection volumes.</li>
+            </ul>
+
+            <!-- Student Presentation Card -->
+            <div class="student-presentation-card">
+              <h4>Project Developed By:</h4>
+              <div class="student-rows">
+                <div class="student-row"><strong>Student Name:</strong> <span>Anuj Kumar Kushwaha</span></div>
+                <div class="student-row"><strong>Roll Number:</strong> <span>250321540033</span></div>
+                <div class="student-row"><strong>Institution:</strong> <span>ABES Engineering College, Ghaziabad</span></div>
+                <div class="student-row"><strong>Specialization:</strong> <span>Full Stack Development &amp; Data Engineering</span></div>
+              </div>
+              <div class="student-tagline">"Analyse Today... Be Prepared Tomorrow..."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Quality & Governance Audit Section (Requirement 8) -->
+        <div class="quality-audit-card">
+          <h3 style="font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Data Quality &amp; Governance Audit
+          </h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Comprehensive transparency report on rows, schema integrity, missing value imputations, and limitations based on verified project data.</p>
+          
+          <div id="quality-audit-container">
+            <!-- Populated dynamically by DashboardEngine.renderDataQualityAudit() -->
+          </div>
+        </div>
+
+        <!-- Poster Features Bottom Banner -->
+        <div class="poster-footer-banner">
+          <div class="features-list">
+            <strong style="color: #fbbf24;">⭐ Core Features:</strong>
+            <span class="feature-pill"><span>&check;</span> Data Cleaning</span>
+            <span class="feature-pill"><span>&check;</span> Trend Analysis</span>
+            <span class="feature-pill"><span>&check;</span> SQL Window Functions</span>
+            <span class="feature-pill"><span>&check;</span> Interactive Dashboard</span>
+            <span class="feature-pill"><span>&check;</span> Data Validation</span>
+          </div>
+          <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">ABES Engineering College, Ghaziabad</span>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- Application Logic Scripts (Using Relative Paths for GitHub Pages Compatibility) -->
+  <script src="js/data.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/sql-engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
