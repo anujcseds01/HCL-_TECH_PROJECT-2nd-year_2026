@@ -1,0 +1,154 @@
+// ============================================================================
+// PROJECT: COVID-19 Disease Trend Analysis
+// POWER BI DAX MEASURES & CALCULATED COLUMNS SPECIFICATION
+// AUTHOR: Anuj Kumar Kushwaha (Roll No: 250321540033)
+// INSTITUTION: ABES Engineering College, Ghaziabad
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// 1. BASE KPI MEASURES (Matching Dashboard KPI Cards)
+// ----------------------------------------------------------------------------
+
+// Total Cases KPI (Displays "676.6M")
+Total Cases = 
+SUM(covid_data[new_cases])
+
+// Formatted Total Cases for Card Display
+Total Cases Display = 
+VAR Cases = [Total Cases]
+RETURN
+    IF(
+        Cases >= 1000000000,
+        FORMAT(Cases / 1000000000, "0.0") & "B",
+        IF(
+            Cases >= 1000000,
+            FORMAT(Cases / 1000000, "0.0") & "M",
+            FORMAT(Cases, "#,##0")
+        )
+    )
+
+// Total Deaths KPI (Displays "6.88M")
+Total Deaths = 
+SUM(covid_data[new_deaths])
+
+Total Deaths Display = 
+VAR Deaths = [Total Deaths]
+RETURN
+    IF(
+        Deaths >= 1000000,
+        FORMAT(Deaths / 1000000, "0.00") & "M",
+        IF(
+            Deaths >= 1000,
+            FORMAT(Deaths / 1000, "0.0") & "K",
+            FORMAT(Deaths, "#,##0")
+        )
+    )
+
+// Total Recovered KPI (Displays "658.1M")
+Total Recovered = 
+SUM(covid_data[new_recovered])
+
+Total Recovered Display = 
+VAR Rec = [Total Recovered]
+RETURN
+    IF(
+        Rec >= 1000000,
+        FORMAT(Rec / 1000000, "0.0") & "M",
+        FORMAT(Rec, "#,##0")
+    )
+
+// Active Cases Calculation
+Active Cases = 
+[Total Cases] - [Total Deaths] - [Total Recovered]
+
+// ----------------------------------------------------------------------------
+// 2. TIME INTELLIGENCE & MOVING AVERAGES
+// ----------------------------------------------------------------------------
+
+// 7-Day Moving Average for Daily Cases (Smooth trend line in Dashboard)
+7-Day Avg Cases = 
+VAR LastVisibleDate = MAX(covid_data[date])
+RETURN
+    CALCULATE(
+        AVERAGEX(
+            VALUES(covid_data[date]),
+            [Total Cases]
+        ),
+        DATESINPERIOD(
+            covid_data[date],
+            LastVisibleDate,
+            -7,
+            DAY
+        )
+    )
+
+// 7-Day Moving Average for Daily Deaths
+7-Day Avg Deaths = 
+VAR LastVisibleDate = MAX(covid_data[date])
+RETURN
+    CALCULATE(
+        AVERAGEX(
+            VALUES(covid_data[date]),
+            [Total Deaths]
+        ),
+        DATESINPERIOD(
+            covid_data[date],
+            LastVisibleDate,
+            -7,
+            DAY
+        )
+    )
+
+// Cumulative Cases running total across time
+Cumulative Cases Trend = 
+CALCULATE(
+    [Total Cases],
+    FILTER(
+        ALLSELECTED(covid_data[date]),
+        covid_data[date] <= MAX(covid_data[date])
+    )
+)
+
+// Cumulative Deaths running total across time
+Cumulative Deaths Trend = 
+CALCULATE(
+    [Total Deaths],
+    FILTER(
+        ALLSELECTED(covid_data[date]),
+        covid_data[date] <= MAX(covid_data[date])
+    )
+)
+
+// ----------------------------------------------------------------------------
+// 3. EPIDEMIOLOGICAL RATIOS & GROWTH PERCENTAGES
+// ----------------------------------------------------------------------------
+
+// Case Fatality Rate (CFR %)
+Case Fatality Rate = 
+DIVIDE([Total Deaths], [Total Cases], 0) * 100
+
+// Recovery Rate (%)
+Recovery Rate = 
+DIVIDE([Total Recovered], [Total Cases], 0) * 100
+
+// Month-over-Month (MoM) Case Growth %
+MoM Case Growth = 
+VAR CurrentMonth = [Total Cases]
+VAR PreviousMonth = 
+    CALCULATE(
+        [Total Cases],
+        DATEADD(covid_data[date], -1, MONTH)
+    )
+RETURN
+    DIVIDE(CurrentMonth - PreviousMonth, PreviousMonth, 0) * 100
+
+// Year-over-Year (YoY) Case Growth %
+YoY Case Growth = 
+VAR CurrentYear = [Total Cases]
+VAR PreviousYear = 
+    CALCULATE(
+        [Total Cases],
+        DATEADD(covid_data[date], -1, YEAR)
+    )
+RETURN
+    DIVIDE(CurrentYear - PreviousYear, PreviousYear, 0) * 100
