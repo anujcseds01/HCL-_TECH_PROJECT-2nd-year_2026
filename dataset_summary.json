@@ -1,0 +1,129 @@
+{
+  "projectTitle": "COVID-19 Disease Trend Analysis",
+  "technologyStack": [
+    "Python",
+    "SQL",
+    "Power BI"
+  ],
+  "author": {
+    "name": "Anuj Kumar Kushwaha",
+    "rollNo": "250321540033",
+    "institution": "ABES Engineering College, Ghaziabad",
+    "motto": "Analyse Today... Be Prepared Tomorrow..."
+  },
+  "metrics": {
+    "totalCases": 676600000,
+    "totalCasesFormatted": "676.6M",
+    "totalDeaths": 6880000,
+    "totalDeathsFormatted": "6.88M",
+    "totalRecovered": 658100000,
+    "totalRecoveredFormatted": "658.1M",
+    "sevenDayAvgPeak": "3.4M",
+    "recoveryRate": "97.27%",
+    "caseFatalityRate": "1.02%",
+    "period": "2020 - 2023",
+    "totalDays": 1461,
+    "totalRows": 16071
+  },
+  "countryBreakdown": [
+    {
+      "country": "USA",
+      "iso": "USA",
+      "continent": "North America",
+      "totalCases": 106000000,
+      "totalCasesFormatted": "106.0M",
+      "totalDeaths": 1160000,
+      "totalDeathsFormatted": "1160.0K"
+    },
+    {
+      "country": "India",
+      "iso": "IND",
+      "continent": "Asia",
+      "totalCases": 44690000,
+      "totalCasesFormatted": "44.7M",
+      "totalDeaths": 531000,
+      "totalDeathsFormatted": "531.0K"
+    },
+    {
+      "country": "France",
+      "iso": "FRA",
+      "continent": "Europe",
+      "totalCases": 40100000,
+      "totalCasesFormatted": "40.1M",
+      "totalDeaths": 167000,
+      "totalDeathsFormatted": "167.0K"
+    },
+    {
+      "country": "Germany",
+      "iso": "DEU",
+      "continent": "Europe",
+      "totalCases": 38400000,
+      "totalCasesFormatted": "38.4M",
+      "totalDeaths": 174000,
+      "totalDeathsFormatted": "174.0K"
+    },
+    {
+      "country": "Brazil",
+      "iso": "BRA",
+      "continent": "South America",
+      "totalCases": 37500000,
+      "totalCasesFormatted": "37.5M",
+      "totalDeaths": 702000,
+      "totalDeathsFormatted": "702.0K"
+    },
+    {
+      "country": "Japan",
+      "iso": "JPN",
+      "continent": "Asia",
+      "totalCases": 33800000,
+      "totalCasesFormatted": "33.8M",
+      "totalDeaths": 74600,
+      "totalDeathsFormatted": "74.6K"
+    },
+    {
+      "country": "South Korea",
+      "iso": "KOR",
+      "continent": "Asia",
+      "totalCases": 34500000,
+      "totalCasesFormatted": "34.5M",
+      "totalDeaths": 35900,
+      "totalDeathsFormatted": "35.9K"
+    },
+    {
+      "country": "United Kingdom",
+      "iso": "GBR",
+      "continent": "Europe",
+      "totalCases": 24700000,
+      "totalCasesFormatted": "24.7M",
+      "totalDeaths": 228000,
+      "totalDeathsFormatted": "228.0K"
+    },
+    {
+      "country": "Italy",
+      "iso": "ITA",
+      "continent": "Europe",
+      "totalCases": 26000000,
+      "totalCasesFormatted": "26.0M",
+      "totalDeaths": 191000,
+      "totalDeathsFormatted": "191.0K"
+    },
+    {
+      "country": "Russia",
+      "iso": "RUS",
+      "continent": "Europe",
+      "totalCases": 23100000,
+      "totalCasesFormatted": "23.1M",
+      "totalDeaths": 400000,
+      "totalDeathsFormatted": "400.0K"
+    },
+    {
+      "country": "Other Countries",
+      "iso": "OTH",
+      "continent": "Global",
+      "totalCases": 267810000,
+      "totalCasesFormatted": "267.8M",
+      "totalDeaths": 3216500,
+      "totalDeathsFormatted": "3216.5K"
+    }
+  ]
+}
